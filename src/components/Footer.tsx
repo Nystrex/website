@@ -12,9 +12,22 @@ const StyledFooter = styled("footer")(({ theme }) => ({
 const Footer = () => {
   return (
     <StyledFooter>
-      <Container sx={{ display: "flex", justifyContent: "center" }}>
+      <Container sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
         <Typography variant="caption" color="textSecondary">
-          © 2022 Fire Bot. All Rights Reserved.
+          © 2024 Fire Bot. All Rights Reserved.
+          <br />
+          <a
+            href="https://inv.wtf/privacy"
+            style={{
+              color: "white",
+            }}
+          >
+            Privacy Policy
+          </a>
+          {" | "}
+          <a href="https://inv.wtf/terms" style={{ color: "white" }}>
+            Terms of Service
+          </a>
         </Typography>
       </Container>
     </StyledFooter>
