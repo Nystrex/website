@@ -45,6 +45,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
 }))
 
 const IndexPage = () => {
+  const query = typeof window != "undefined" ? new URLSearchParams(window.location.search) : undefined
   return (
     <DefaultLayout>
       <Container>
@@ -61,7 +62,13 @@ const IndexPage = () => {
           })}
         >
           <Grid item xs={3} md={2} mb={3}>
-            <Image src="/logo-gr.svg" width={256} height={256} layout="responsive" alt="Fire's logo" />
+            <Image
+              src={query && query.get("uwu") == "true" ? "/logo-uwu.png" : "/logo-gr.svg"}
+              width={256}
+              height={256}
+              layout="responsive"
+              alt="Fire's logo"
+            />
           </Grid>
           <Grid item xs={12} container justifyContent="center">
             <Grid item xs={12} sm={7} md={5}>

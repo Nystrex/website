@@ -61,9 +61,16 @@ const NavBar = () => {
       </Link>
     )
   } else {
+    const query = typeof window != "undefined" ? new URLSearchParams(window.location.search) : undefined
     homePageLink = (
       <Link>
-        <NextImage src="/logo-gr.svg" width={40} height={40} layout="intrinsic" priority />
+        <NextImage
+          src={query && query.get("uwu") == "true" ? "/logo-uwu.png" : "/logo-gr.svg"}
+          width={40}
+          height={40}
+          layout="intrinsic"
+          priority
+        />
       </Link>
     )
   }
