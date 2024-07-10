@@ -40,7 +40,9 @@ type Props = {
 type JoinRequestResponse = { error: string; code: number } | { error: null; invite: Invite }
 
 const domain =
-  process.env.NODE_ENV == "development" ? "http://localhost:1338/v2/discoverable/join" : "https://discover-v2.inv.wtf"
+  process.env.NODE_ENV == "development"
+    ? "http://aether-local.getfire.bot/v2/discoverable/join"
+    : "https://discover-v2.inv.wtf"
 
 const DiscoverableGuildCard = ({ guild, isShiftHeld }: Props) => {
   const [isMenuOpen, setMenuOpen] = React.useState(false)
