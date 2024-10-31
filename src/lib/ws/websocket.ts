@@ -51,6 +51,8 @@ export class Websocket extends WebSocket {
     }
     if (eventHandler) {
       this.aether = eventHandler
+      clearInterval(this.aether.heartbeat as unknown as number)
+      this.aether.queue = this.aether.queue.filter((message) => message.type != EventType.HEARTBEAT)
       this.aether.setWebsocket(this)
     }
   }
