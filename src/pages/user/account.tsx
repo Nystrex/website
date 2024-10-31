@@ -154,8 +154,8 @@ const AccountPage = () => {
 
     const dataResponse = await requestData().catch(() => {
       emitter.emit("NOTIFICATION", {
-        text: "Failed to request data",
-        severity: "error",
+        text: "Retrieving data may take a while...",
+        severity: "warning",
         horizontal: "right",
         vertical: "top",
         autoHideDuration: 5000,
@@ -193,9 +193,9 @@ const AccountPage = () => {
       setTimeout(() => {
         if (handler.websocket?.handlers.has(nonce)) {
           handler.websocket.handlers.delete(nonce)
-          reject("Data request timed out")
+          reject("Data request timed out, may still be generating")
         }
-      }, 10000)
+      }, 30000)
     })
 
   const onClickSubscribe = async () => {
