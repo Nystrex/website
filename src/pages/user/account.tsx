@@ -282,8 +282,9 @@ const AccountPage = () => {
               }
             >
               <span>
-                <Button color="primary" disabled>
-                  Request collected data
+                {/* Calling the same onClick function will download the existing data package */}
+                <Button id="request-data" color="primary" onClick={onClickRequestData}>
+                  Download data package
                 </Button>
               </span>
             </Tooltip>
