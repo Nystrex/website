@@ -134,6 +134,12 @@ export class AetherClient {
   }
 
   setWebsocket(websocket: Websocket) {
+    console.debug(
+      `%c WS %c Connection %c Initialising websocket... `,
+      "background: #279AF1; color: white; border-radius: 3px 0 0 3px;",
+      "background: #F5BDE6; color: black; border-radius: 0 3px 3px 0",
+      "background: #353A47; color: white; border-radius: 0 3px 3px 0",
+    )
     if (process.env.NODE_ENV == "development" || this.isSuperuser())
       // easy access for debugging
       (globalThis as { [key: string]: unknown }).aether = this
@@ -152,7 +158,6 @@ export class AetherClient {
         "background: #353A47; color: white; border-radius: 0 3px 3px 0",
         { url: websocket.connectedTo },
       )
-      while (this.queue.length) this.send(this.queue.pop())
     }
     this.websocket.onclose = async (event: CloseEvent) => {
       console.error(
@@ -284,7 +289,14 @@ export class AetherClient {
         }
       }
       try {
-        await sleep(getReconnectTime(event.code))
+        const reconnectTime = getReconnectTime(event.code)
+        console.warn(
+          `%c WS %c Connection %c Reconnecting in ${reconnectTime / 1000}s... `,
+          "background: #279AF1; color: white; border-radius: 3px 0 0 3px;",
+          "background: #FFFD98; color: black; border-radius: 0 3px 3px 0",
+          "background: #353A47; color: white; border-radius: 0 3px 3px 0",
+        )
+        await sleep(reconnectTime)
         console.info(
           "%c WS %c Connection %c Reconnecting... ",
           "background: #279AF1; color: white; border-radius: 3px 0 0 3px;",
@@ -365,7 +377,16 @@ export class AetherClient {
       this.auth.user.image = getAvatarImage(data.auth.user)
     if (this.auth && data.auth?.user?.banner && !this.auth?.user?.banner?.includes(data.auth?.user?.banner))
       this.auth.user.banner = getBannerImage(data.auth.user)
-    while (this.queue.length) this.send(this.queue.pop())
+    if (this.queue.length) {
+      console.warn(
+        `%c WS %c Aether %c Sending queued messages... `,
+        "background: #279AF1; color: white; border-radius: 3px 0 0 3px;",
+        "background: #FFFD98; color: black; border-radius: 0 3px 3px 0",
+        "background: #353A47; color: white; border-radius: 0 3px 3px 0",
+        { size: this.queue.length },
+      )
+      while (this.queue.length) this.send(this.queue.pop())
+    }
     this.session = data.session
     this.config = { ...this.config, ...data.config }
     // const removedSessions = this.sessions.filter(
@@ -423,7 +444,16 @@ export class AetherClient {
       this.auth.user.image = getAvatarImage(identified.auth.user)
     if (this.auth && identified.auth?.user?.banner && !this.auth?.user?.banner?.includes(identified.auth?.user?.banner))
       this.auth.user.banner = getBannerImage(identified.auth.user)
-    while (this.queue.length) this.send(this.queue.pop())
+    if (this.queue.length) {
+      console.warn(
+        `%c WS %c Aether %c Sending queued messages... `,
+        "background: #279AF1; color: white; border-radius: 3px 0 0 3px;",
+        "background: #FFFD98; color: black; border-radius: 0 3px 3px 0",
+        "background: #353A47; color: white; border-radius: 0 3px 3px 0",
+        { size: this.queue.length },
+      )
+      while (this.queue.length) this.send(this.queue.pop())
+    }
     setTimeout(() => {
       if (!this.heartbeat && this.websocket && this.websocket.readyState == this.websocket.OPEN)
         this.websocket.close(4004, "Did not receive HELLO")
@@ -442,7 +472,7 @@ export class AetherClient {
         device: { mobile: null, model: null },
         userAgent: navigator?.userAgent,
         language: navigator?.language,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       } as any
       if (navigator?.userAgent) {
         const userAgentData = new UAParser(navigator?.userAgent ?? "")
