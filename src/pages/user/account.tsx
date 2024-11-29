@@ -234,7 +234,14 @@ const AccountPage = () => {
         (premiumPromotion?.expires ?? Number.MAX_VALUE) > +new Date() && (
           <Box width={"100%"}>
             <Alert severity="info" variant="outlined">
-              {premiumPromotion.text}
+              {`This Black Friday weekend, enjoy our BIGGEST SALE YET on Fire Premium 🔥
+              
+              €2.90/month for 12 months
+              OR
+              €23.20 for your first year with annual billing
+
+              Available for new and past customers, a first for Fire Premium!
+              Discount is automatically applied at checkout, ends December 2nd at 23:59 UTC`}
             </Alert>
             <br></br>
           </Box>
