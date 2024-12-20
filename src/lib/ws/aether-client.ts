@@ -133,7 +133,27 @@ export class AetherClient {
     return routeBuilder(this)
   }
 
-  setWebsocket(websocket: Websocket) {
+  get awaitVisible(): Promise<void> {
+    return new Promise((resolve) => {
+      document.addEventListener(
+        "visibilitychange",
+        () => {
+          if (document.visibilityState == "visible") resolve()
+          else document.addEventListener("visibilitychange", () => resolve(), { once: true })
+        },
+        { once: true },
+      )
+    })
+  }
+
+  private closeOnInvisible() {
+    // Always remove to try avoid duplicate calls
+    document.removeEventListener("visibilitychange", this.closeOnInvisible.bind(this))
+    if (document.visibilityState == "hidden") this.websocket?.close(4010, "Inactive Session")
+    else document.addEventListener("visibilitychange", this.closeOnInvisible.bind(this))
+  }
+
+  async setWebsocket(websocket: Websocket) {
     console.debug(
       `%c WS %c Connection %c Initialising websocket... `,
       "background: #279AF1; color: white; border-radius: 3px 0 0 3px;",
@@ -146,17 +166,25 @@ export class AetherClient {
     delete this.acked
     websocket.aether = this
     if (this.websocket) {
-      this.websocket.close(1000, "Reconnecting")
+      this.websocket.close(4010, "Reconnecting")
       delete this.websocket
     }
+    document.addEventListener("visibilitychange", this.closeOnInvisible.bind(this))
     this.websocket = websocket
+    window.onbeforeunload = () => {
+      if (!this.websocket) return
+      this.websocket.onclose = () => {}
+      this.websocket.close(4010, "Tab is being unloaded")
+    }
     this.websocket.onopen = () => {
       console.info(
         `%c WS %c Connection %c Websocket connected! `,
         "background: #279AF1; color: white; border-radius: 3px 0 0 3px;",
         "background: #9CFC97; color: black; border-radius: 0 3px 3px 0",
         "background: #353A47; color: white; border-radius: 0 3px 3px 0",
-        { url: websocket.connectedTo },
+        this.session
+          ? { url: websocket.connectedTo, sessionId: this.session, seq: this.seq }
+          : { url: websocket.connectedTo },
       )
     }
     this.websocket.onclose = async (event: CloseEvent) => {
@@ -232,6 +260,7 @@ export class AetherClient {
                 delete this.session
                 delete this.seq
                 if (!this.websocket) throw new Error("what the fuck")
+                await this.awaitVisible
                 const ws = new Websocket(`${this.websocket.connectedTo}?encoding=zlib`)
                 return this.setWebsocket(ws)
               }
@@ -240,6 +269,7 @@ export class AetherClient {
               delete this.session
               delete this.seq
               if (!this.websocket) throw new Error("what the fuck")
+              await this.awaitVisible
               const ws = new Websocket(`${this.websocket.connectedTo}?encoding=zlib`)
               return this.setWebsocket(ws)
             }
@@ -289,14 +319,24 @@ export class AetherClient {
         }
       }
       try {
-        const reconnectTime = getReconnectTime(event.code)
-        console.warn(
-          `%c WS %c Connection %c Reconnecting in ${reconnectTime / 1000}s... `,
-          "background: #279AF1; color: white; border-radius: 3px 0 0 3px;",
-          "background: #FFFD98; color: black; border-radius: 0 3px 3px 0",
-          "background: #353A47; color: white; border-radius: 0 3px 3px 0",
-        )
-        await sleep(reconnectTime)
+        if (event.code == 4010 && event.reason == "Inactive Session") {
+          console.warn(
+            `%c WS %c Connection %c Reconnecting once tab is active again... `,
+            "background: #279AF1; color: white; border-radius: 3px 0 0 3px;",
+            "background: #FFFD98; color: black; border-radius: 0 3px 3px 0",
+            "background: #353A47; color: white; border-radius: 0 3px 3px 0",
+          )
+          await this.awaitVisible
+        } else {
+          const reconnectTime = getReconnectTime(event.code)
+          console.warn(
+            `%c WS %c Connection %c Reconnecting in ${reconnectTime / 1000}s... `,
+            "background: #279AF1; color: white; border-radius: 3px 0 0 3px;",
+            "background: #FFFD98; color: black; border-radius: 0 3px 3px 0",
+            "background: #353A47; color: white; border-radius: 0 3px 3px 0",
+          )
+          await sleep(reconnectTime)
+        }
         console.info(
           "%c WS %c Connection %c Reconnecting... ",
           "background: #279AF1; color: white; border-radius: 3px 0 0 3px;",
@@ -306,7 +346,7 @@ export class AetherClient {
         if (!this.websocket) throw new Error("what the fuck")
         const ws = new Websocket(
           this.session
-            ? `${this.websocket.connectedTo}?sessionId=${this.session}&seq=${this.seq}&encoding=zlib`
+            ? `${this.websocket.connectedTo}?sessionId=${this.session}&seq=${this.seq ?? -1}&encoding=zlib`
             : `${this.websocket.connectedTo}?encoding=zlib`,
         )
         return this.setWebsocket(ws)
