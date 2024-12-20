@@ -222,7 +222,7 @@ export class AetherClient {
           })
         delete this.session
         delete this.seq
-      } else if (event.code != 4001 && event.code != 4009)
+      } else if (event.code != 4001 && event.code != 4009 && event.code != 4010)
         this.emitter.emit("NOTIFICATION", {
           text: event.reason ? event.reason : `Websocket error occurred (${event.code})`,
           severity: "error",
