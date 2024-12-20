@@ -1,4 +1,5 @@
 import { AetherClient } from "./aether-client"
+import { Message } from "./message"
 import { MessageUtil } from "./message-util"
 
 import { EventType } from "@/interfaces/aether"
@@ -59,5 +60,21 @@ export class Websocket extends WebSocket {
 
   get open() {
     return this.readyState === this.OPEN
+  }
+
+  // The regular close method doesn't send the close frame sometimes
+  // so we can just tell the server to close it for us for 100% reliability
+  close(code?: number, reason?: string) {
+    if (!this.open) return
+    const message = new Message(EventType.CLOSE_SESSION, { code: code ?? 1000, reason: reason ?? "Going Away" })
+    console.debug(
+      `%c WS %c Outgoing %c ${EventType[message.type]} `,
+      "background: #279AF1; color: white; border-radius: 3px 0 0 3px;",
+      "background: #9CFC97; color: black; border-radius: 0 3px 3px 0",
+      "background: #353A47; color: white; border-radius: 0 3px 3px 0",
+      message.toJSON(),
+    )
+    this.send(MessageUtil.encode(message))
+    super.close(code, reason)
   }
 }

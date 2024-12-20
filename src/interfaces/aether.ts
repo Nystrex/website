@@ -145,6 +145,7 @@ export enum EventType {
   DELETE_VANITY,
   FEATURE_GUILD_ON_DISCOVER,
   REMOVE_FROM_DISCOVERY,
+  CLOSE_SESSION,
 }
 
 export type Notification = {
