@@ -407,10 +407,6 @@ export class AetherClient {
       delete this.seq
       return this.websocket?.close(4005, "Invalid Session")
     } else if (this.auth && data.auth) this.oauth = data.auth
-    if (this.auth?.user?.id && (!data.guilds.length || data.guilds.length != this.guilds.length)) {
-      this.send(new Message(EventType.GUILD_SYNC, { existing: this.guilds }))
-      this.guilds = []
-    }
     this.identified = true // should already be true but just in case
     if (typeof this.auth?.refresh == "function") await this.auth.refresh()
     if (this.auth?.user?.image && data.auth?.user?.avatar && !this.auth?.user?.image.includes(data.auth?.user?.avatar))
@@ -440,7 +436,7 @@ export class AetherClient {
     if (process.env.NODE_ENV == "development" || this.isSuperuser())
       (globalThis as { [key: string]: unknown }).aether = this // easy access for debugging
     console.info(
-      `%c WS %c Sessions %c Successfully resumed${data.replayed ? " with " + data.replayed + " replayed events" : ""} `,
+      `%c WS %c Sessions %c Successfully resumed${data.replayed ? ` with ${data.replayed} replayed events` : ""} `,
       "background: #279AF1; color: white; border-radius: 3px 0 0 3px;",
       "background: #9CFC97; color: black; border-radius: 0 3px 3px 0",
       "background: #353A47; color: white; border-radius: 0 3px 3px 0",
@@ -611,7 +607,10 @@ export class AetherClient {
   }
 
   GUILD_CREATE(guild: DiscordGuild & { bot?: APIMember }) {
+    // if the guild isn't in the list, just a simple push will do
     if (!this.guilds.find((g) => g.id == guild.id)) this.guilds.push(guild)
+    // but this can also be used to send updated guild info on resumes so we need to be able to replace too
+    else this.guilds[this.guilds.findIndex((g) => g.id == guild.id)] = guild
   }
 
   GUILD_DELETE(data: { id: string }) {
