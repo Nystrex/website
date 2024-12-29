@@ -120,6 +120,8 @@ export type DiscordGuild = {
   features: string[]
 }
 
+export type DiscordGuildWithBot = DiscordGuild & { bot?: APIMember }
+
 export type PremiumDiscordGuild = DiscordGuild & {
   premium: boolean
   managed: boolean | null

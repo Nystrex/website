@@ -1,4 +1,4 @@
-import { APIUser, AuthorizationInfo, DiscordGuild, PartialOAuthUser } from "@/interfaces/discord"
+import { APIUser, AuthorizationInfo, DiscordGuild, DiscordGuildWithBot, PartialOAuthUser } from "@/interfaces/discord"
 
 export type ShardStats = {
   id: number
@@ -164,23 +164,37 @@ export type Reminder = {
   timestamp: number
 }
 
+export type UserExperimentBasicData = {
+  activeBucket: number
+  id: string
+  override: boolean
+}
+
+export type GuildExperimentBasicData = {
+  id: string
+  overrides: [string, number][]
+}
+
 export type IdentifyResponse = {
-  config?: Record<string, unknown>
-  guilds?: UnavailableGuild[]
   auth?: AuthorizationInfo
-  sessions: SessionInfo[]
+  config?: Record<string, unknown>
+  experiments: UserExperimentBasicData[]
+  guildExperiments: GuildExperimentBasicData[]
   rateLimit: WSRateLimit
   session: string
+  sessions: SessionInfo[]
 }
 
 export type ResumeResponse = {
-  config: Record<string, unknown>
-  guilds: UnavailableGuild[]
   auth?: AuthorizationInfo
-  sessions: SessionInfo[]
+  config?: Record<string, unknown>
+  experiments: UserExperimentBasicData[]
+  guildExperiments: GuildExperimentBasicData[]
+  guilds: DiscordGuildWithBot[]
   rateLimit: WSRateLimit
   replayed: number
   session: string
+  sessions: SessionInfo[]
 }
 
 export type SessionInfo = {
