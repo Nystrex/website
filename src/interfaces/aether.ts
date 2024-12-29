@@ -1,4 +1,4 @@
-import { APIUser, AuthorizationInfo, DiscordGuild, DiscordGuildWithBot, PartialOAuthUser } from "@/interfaces/discord"
+import { APIUser, AuthorizationInfo, DiscordGuild, PartialOAuthUser } from "@/interfaces/discord"
 
 export type ShardStats = {
   id: number
@@ -190,7 +190,6 @@ export type ResumeResponse = {
   config?: Record<string, unknown>
   experiments: UserExperimentBasicData[]
   guildExperiments: GuildExperimentBasicData[]
-  guilds: DiscordGuildWithBot[]
   rateLimit: WSRateLimit
   replayed: number
   session: string
