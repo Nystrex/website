@@ -543,6 +543,7 @@ export class AetherClient {
               },
               client,
             },
+            guilds: [...this.guilds],
             env: process.env.NODE_ENV,
           },
           nonce,
@@ -570,6 +571,7 @@ export class AetherClient {
   }
 
   applyExperiment(label: string, id: string, bucket: number) {
+    if (!this.isSuperuser()) return
     this.send(
       new Message(EventType.APPLY_EXPERIMENT, {
         label,
